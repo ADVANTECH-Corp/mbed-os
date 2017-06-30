@@ -202,6 +202,7 @@ typedef struct
                                                                  And another 32 row double-word (64-bit) will be programmed */
 #define FLASH_TYPEPROGRAM_FAST_AND_LAST ((uint32_t)0x02)  /*!<Fast program a 32 row double-word (64-bit) at a specified address.
                                                                  And this is the last 32 row double-word (64-bit) programmed */
+#define FLASH_TYPEPROGRAM_WORD          ((uint32_t)0x03)
 /**
   * @}
   */
