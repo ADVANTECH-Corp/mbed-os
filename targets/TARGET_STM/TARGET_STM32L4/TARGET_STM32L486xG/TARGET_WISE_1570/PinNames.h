@@ -77,7 +77,7 @@ typedef enum {
     PC_2  = 0x22,
     PC_3  = 0x23,
     PC_4  = 0x24,
-    PC_5  = 0x25,
+	PC_5  = 0x25,
     PC_6  = 0x26,
     PC_7  = 0x27,
     PC_8  = 0x28,
@@ -90,7 +90,6 @@ typedef enum {
     PC_15 = 0x2F,
 
     PD_2  = 0x32,
-
     PH_0  = 0x70,
     PH_1  = 0x71,
 
@@ -131,6 +130,7 @@ typedef enum {
     
 	USBTX       = PA_2,
     USBRX       = PA_3,
+
 #if 0    
 	USER_BUTTON = PC_13,
     SERIAL_TX   = PA_2,
@@ -166,11 +166,14 @@ typedef enum {
   	UART3_RX    = PC_11,
   	UART3_CTS   = PB_14,
   	UART3_RTS   = PB_13,
-  
+	UART_TXD	= UART3_TX, 
+	UART_RXD	= UART3_RX,
 	// RF Main Port
 	LPUART1_TX  = PC_1,
 	LPUART1_RX  = PC_0,
 
+  	//SERIAL_TX   = LPUART1_TX,
+  	//SERIAL_RX   = LPUART1_RX,
   	SERIAL_TX   = UART2_TX,
   	SERIAL_RX   = UART2_RX,
   	SERIAL_CTS  = UART3_CTS,
@@ -185,7 +188,7 @@ typedef enum {
   	SPI_CS0     = PA_4,
   	SPI_CS	  	= SPI_CS0, 
  
-  	PWM_OUT     = PB_0,
+  	PWM0_OUT    = PB_0,
   	PWM1_OUT    = PB_1,
 
   	ADC00       = PA_1,

@@ -131,6 +131,7 @@
 // Select the clock sources (default is PLL_MSI) to start with (0=OFF, 1=ON)
 #define USE_PLL_HSE_EXTC (0) // Use external clock
 #define USE_PLL_HSE_XTAL (0) // Use external xtal
+//#define USE_PLL_HSE_XTAL (1) // Use external xtal
 #define USE_PLL_HSI      (0) // Use HSI/MSI internal clock (0=MSI, 1=HSI)
 #define DEBUG_MCO        (0) // Output the MCO on PA8 for debugging (0=OFF, 1=SYSCLK, 2=HSE, 3=HSI, 4=MSI)
 /**
@@ -390,6 +391,7 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
 {
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   // Used to gain time after DeepSleep in case HSI is used
   if (__HAL_RCC_GET_FLAG(RCC_FLAG_HSIRDY) != RESET)
@@ -403,10 +405,12 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
     
   // Enable HSE oscillator and activate PLL with HSE as source
-  RCC_OscInitStruct.OscillatorType        = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI;
+  //RCC_OscInitStruct.OscillatorType        = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.OscillatorType        = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_HSI;
   if (bypass == 0)
   {
     RCC_OscInitStruct.HSEState            = RCC_HSE_ON; // External 8 MHz xtal on OSC_IN/OSC_OUT
+    RCC_OscInitStruct.LSEState            = RCC_LSE_ON; // ADD by WL
   }
   else
   {
@@ -415,20 +419,26 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
   RCC_OscInitStruct.HSIState              = RCC_HSI_OFF;
   RCC_OscInitStruct.PLL.PLLSource         = RCC_PLLSOURCE_HSE; // 8 MHz
   RCC_OscInitStruct.PLL.PLLState          = RCC_PLL_ON;
+
+  /* Select LSE output as LPUART1 clock source */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC | RCC_PERIPHCLK_LPUART1;
+  PeriphClkInitStruct.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_LSE;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
   
   // Non-USB configuration : sysclock = 80MHz
-  //RCC_OscInitStruct.PLL.PLLM              = 1; // VCO input clock = 8 MHz (8 MHz / 1)
-  //RCC_OscInitStruct.PLL.PLLN              = 20; // VCO output clock = 160 MHz (8 MHz * 20)
-  //RCC_OscInitStruct.PLL.PLLP              = 7; // PLLSAI3 clock = 22 MHz (160 MHz / 7)
-  //RCC_OscInitStruct.PLL.PLLQ              = 4; // USB clock (PLL48M1) = 40 MHz (160 MHz / 4) --> Not good for USB
-  //RCC_OscInitStruct.PLL.PLLR              = 2; // PLL clock = 80 MHz (160 MHz / 2)
+  RCC_OscInitStruct.PLL.PLLM              = 1; // VCO input clock = 8 MHz (8 MHz / 1)
+  RCC_OscInitStruct.PLL.PLLN              = 20; // VCO output clock = 160 MHz (8 MHz * 20)
+  RCC_OscInitStruct.PLL.PLLP              = 7; // PLLSAI3 clock = 22 MHz (160 MHz / 7)
+  RCC_OscInitStruct.PLL.PLLQ              = 4; // USB clock (PLL48M1) = 40 MHz (160 MHz / 4) --> Not good for USB
+  RCC_OscInitStruct.PLL.PLLR              = 2; // PLL clock = 80 MHz (160 MHz / 2)
 
   // USB configuration : sysclock = 48 MHz
-  RCC_OscInitStruct.PLL.PLLM              = 1; // VCO input clock = 8 MHz (8 MHz / 1)
-  RCC_OscInitStruct.PLL.PLLN              = 24; // VCO output clock = 192 MHz (8 MHz * 24)
-  RCC_OscInitStruct.PLL.PLLP              = 7; // PLLSAI3 clock = 27.4 MHz (192 MHz / 7)
-  RCC_OscInitStruct.PLL.PLLQ              = 4; // USB clock (PLL48M1) = 48 MHz (192 MHz / 4) --> OK for USB
-  RCC_OscInitStruct.PLL.PLLR              = 4; // PLL clock = 48 MHz (192 MHz / 4)
+  //RCC_OscInitStruct.PLL.PLLM              = 1; // VCO input clock = 8 MHz (8 MHz / 1)
+  //RCC_OscInitStruct.PLL.PLLN              = 24; // VCO output clock = 192 MHz (8 MHz * 24)
+  //RCC_OscInitStruct.PLL.PLLP              = 7; // PLLSAI3 clock = 27.4 MHz (192 MHz / 7)
+  //RCC_OscInitStruct.PLL.PLLQ              = 4; // USB clock (PLL48M1) = 48 MHz (192 MHz / 4) --> OK for USB
+  //RCC_OscInitStruct.PLL.PLLR              = 4; // PLL clock = 48 MHz (192 MHz / 4)
   
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -561,9 +571,13 @@ uint8_t SetSysClock_PLL_MSI(void)
    /* Enable MSI Auto-calibration through LSE */
   HAL_RCCEx_EnableMSIPLLMode();
   /* Select MSI output as USB clock source */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
-  PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_MSI; /* 48 MHz */
+  //PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
+  //PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_MSI; /* 48 MHz */
+  /* Select LSE output as LPUART1 clock source */
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LPUART1;
+  PeriphClkInitStruct.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_LSE;
   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+  
   // Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers
   RCC_ClkInitStruct.ClockType      = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
   RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK; /* 80 MHz */
