@@ -129,8 +129,8 @@ typedef enum {
 	LPUART1_TX  = PC_1,
 	LPUART1_RX  = PC_0,
 
-  	SERIAL_TX   = UART2_TX,
-  	SERIAL_RX   = UART2_RX,
+  	SERIAL_TX   = UART3_TX,  //for wise-1570 MP test original UART2
+  	SERIAL_RX   = UART3_RX,  //for wise-1570 MP test original UART2
   	SERIAL_CTS  = UART3_CTS,
   	SERIAL_RTS  = UART3_RTS,
  

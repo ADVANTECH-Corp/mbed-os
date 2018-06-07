@@ -55,9 +55,9 @@ typedef enum {
     LPUART_1 = (int)LPUART1_BASE
 } UARTName;
 
-#define STDIO_UART_TX  PA_2
-#define STDIO_UART_RX  PA_3
-#define STDIO_UART     UART_2
+#define STDIO_UART_TX  PC_10  //for wise-1570 MP test original PA_2
+#define STDIO_UART_RX  PC_11  //for wise-1570 MP test original PA_3
+#define STDIO_UART     UART_3 //for wise-1570 MP test original UART_2
 
 typedef enum {
     SPI_1 = (int)SPI1_BASE,
