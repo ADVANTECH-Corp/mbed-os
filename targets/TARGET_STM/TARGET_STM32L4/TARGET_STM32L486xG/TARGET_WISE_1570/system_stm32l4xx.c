@@ -130,10 +130,9 @@
 
 // Select the clock sources (default is PLL_MSI) to start with (0=OFF, 1=ON)
 #define USE_PLL_HSE_EXTC (0) // Use external clock
-//#define USE_PLL_HSE_XTAL (0) // Use external xtal
 #define USE_PLL_HSE_XTAL (1) // Use external xtal
 #define USE_PLL_HSI      (0) // Use HSI/MSI internal clock (0=MSI, 1=HSI)
-#define DEBUG_MCO        (0) // Output the MCO on PA8 for debugging (0=OFF, 1=SYSCLK, 2=HSE, 3=HSI, 4=MSI)
+#define DEBUG_MCO        (0) // Output the MCO on PA8 for debugging (0=OFF, 1=SYSCLK, 2=HSE, 3=HSI, 4=MSI, 5=LSE)
 /**
   * @}
   */
@@ -468,6 +467,9 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
     HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_2); // 4 MHz
   else
     HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_1); // 8 MHz
+#endif
+#if DEBUG_MCO == 5
+  HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_LSE, RCC_MCODIV_1);
 #endif
   
   return 1; // OK
