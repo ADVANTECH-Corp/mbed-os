@@ -143,6 +143,7 @@ typedef enum {
   	SPI_MISO    = PA_6,
   	SPI_SCK     = PA_5,
   	SPI_CS0     = PA_4,
+  	SPI_CS1     = PA_15,
   	SPI_CS	  	= SPI_CS0, 
  
   	PWM0_OUT    = PB_0,
