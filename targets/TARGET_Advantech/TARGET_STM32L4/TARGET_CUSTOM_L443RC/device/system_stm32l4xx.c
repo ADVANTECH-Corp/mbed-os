@@ -135,6 +135,7 @@
 #define USE_PLL_HSE_XTAL (1) // Use external xtal
 #define USE_PLL_HSI      (0) // Use HSI/MSI internal clock (0=MSI, 1=HSI)
 #define DEBUG_MCO        (0) // Output the MCO on PA8 for debugging (0=OFF, 1=SYSCLK, 2=HSE, 3=HSI, 4=MSI)
+#define DEBUG_MCO_LSE    (0) // Output the MCO on PA8 for debugging
 /**
   * @}
   */
@@ -484,10 +485,17 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0);
     
   // Enable HSE oscillator and activate PLL with HSE as source
+#if (DEBUG_MCO_LSE != 0)  
+  RCC_OscInitStruct.OscillatorType        = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_LSE | RCC_OSCILLATORTYPE_HSI48;
+#else
   RCC_OscInitStruct.OscillatorType        = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI48;
+#endif
   if (bypass == 0)
   {
     RCC_OscInitStruct.HSEState            = RCC_HSE_ON; // External 8 MHz xtal on OSC_IN/OSC_OUT
+#if (DEBUG_MCO_LSE != 0)
+    RCC_OscInitStruct.LSEState            = RCC_LSE_ON; // ADD by WL
+#endif
   }
   else
   {
@@ -553,6 +561,9 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
     HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_2); // 4 MHz
   else
     HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_1); // 8 MHz
+#endif
+#if (DEBUG_MCO_LSE != 0)
+  HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_LSE, RCC_MCODIV_1);
 #endif
   
   return 1; // OK
@@ -656,10 +667,12 @@ uint8_t SetSysClock_PLL_MSI(void)
   }
    /* Enable MSI Auto-calibration through LSE */
   HAL_RCCEx_EnableMSIPLLMode();
+
   /* Select MSI output as USB clock source */
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
   PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_MSI; /* 48 MHz */
   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct);
+  
   // Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers
   RCC_ClkInitStruct.ClockType      = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
   RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK; /* 80 MHz */

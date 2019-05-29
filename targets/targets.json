@@ -1154,6 +1154,11 @@
         "macros_add": ["WISE_1511"],
         "extra_labels_add": ["WISE_1511"]
     },
+    "MIOTY": {
+        "inherits": ["CUSTOM_L443RC"],
+        "macros_add": ["MIOTY"],
+        "extra_labels_add": ["MIOTY"]
+    },
     "WISE_1530": {
         "inherits": ["CUSTOM_F412RE"],
         "macros_add": ["WISE_1530"],
